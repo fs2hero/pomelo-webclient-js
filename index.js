@@ -69,4 +69,4 @@ function PomeloFactory() {
     });
 }
 
-module.exports = PomeloFactory;
+module.exports = PomeloFactory();
