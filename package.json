@@ -1,6 +1,6 @@
 {
   "name": "pomelo-webclient-js",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "pomelo微信小程序客户端",
   "main": "index.js",
   "dependencies": {
