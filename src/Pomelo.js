@@ -13,24 +13,24 @@ const RES_FAIL = 500;
 const RES_OLD_CLIENT = 501;
 
 function defaultDecode(data) {
-    if(!data){
+    if (!data) {
         return {};
     }
-    
-    const msg =  JSON.parse(data);
+
+    const msg = JSON.parse(data);
     return msg;
 }
 
 function defaultEncode(reqId, route, msg) {
-    if(msg){
+    if (msg) {
         msg = JSON.stringify(msg);
     }
     return msg;
 }
 
-function defaultUrlGenerator(host, port,isHttps) {
+function defaultUrlGenerator(host, port, isHttps) {
     let protocol = 'http://';
-    if(isHttps){
+    if (isHttps) {
         protocol = 'https://'
     }
 
@@ -67,10 +67,10 @@ module.exports = class Pomelo extends EventEmitter {
         this.isHttps = params.isHttps || false;
 
         if (debugMode) {
-            this.url = defaultUrlGenerator(host, port,this.isHttps);
+            this.url = defaultUrlGenerator(host, port, this.isHttps);
         }
         else {
-            this.url = this.urlGenerator(host, port,this.isHttps);
+            this.url = this.urlGenerator(host, port, this.isHttps);
         }
 
         if (browserWS) {
@@ -88,7 +88,7 @@ module.exports = class Pomelo extends EventEmitter {
     makeXHR(reqId, route, method, msg) {
 
         const onMessage = data => {
-            console.log('onMessage ',data);
+            console.log('onMessage ', data);
             this.onData(data);
         };
 
@@ -115,31 +115,47 @@ module.exports = class Pomelo extends EventEmitter {
 
         if (method.toLowerCase() == 'get') {
             for (var key in msg) {
-                if(query == ''){
-                    query = '?' + key + '=' + msg[key];
+                if (query == '') {
+                    query = '?' + key + '=';// + msg[key];
                 }
-                else{
-                    query = query + '&' + key + '=' + msg[key];
+                else {
+                    query = query + '&' + key + '=';// + msg[key];
+                }
+
+                var value = msg[key];
+                if (typeof value === 'object') {
+                    if (value) {
+                        query += encodeURIComponent(JSON.stringify(value));
+                    }
+                    else {
+                        query += value;
+                    }
+                }
+                else if (typeof value == 'string') {
+                    query += encodeURIComponent(value);
+                }
+                else {
+                    query += value;
                 }
             }
         }
 
         var requestUrl = this.url + route;
-        if(query != ''){
+        if (query != '') {
             requestUrl = requestUrl + query;
         }
-        console.log('requestUrl ',requestUrl);
+        console.log('requestUrl ', requestUrl);
 
-        this.socket.open(method, requestUrl,true);
+        this.socket.open(method, requestUrl, true);
 
         // this.socket.setRequestHeader("Request-Id",this.reqId);
 
         if (reqId > 0) {
-            this.socket.setRequestHeader('X-Request-Id',reqId);
+            this.socket.setRequestHeader('X-Request-Id', reqId);
         }
 
-        if(this.token != '') {
-            this.socket.setRequestHeader('X-Access-Token',this.token);
+        if (this.token != '') {
+            this.socket.setRequestHeader('X-Access-Token', this.token);
         }
         this.socket.setRequestHeader("Content-Type", "application/json");
         if (this.headers) {
@@ -212,8 +228,8 @@ module.exports = class Pomelo extends EventEmitter {
         }
 
         //if have a id then find the callback function with the request
-        console.log('callbacks  ',this.callbacks);
-        
+        console.log('callbacks  ', this.callbacks);
+
         const cb = this.callbacks[msg.id];
 
         delete this.callbacks[msg.id];
