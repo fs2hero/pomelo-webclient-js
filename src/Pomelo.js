@@ -28,8 +28,13 @@ function defaultEncode(reqId, route, msg) {
     return msg;
 }
 
-function defaultUrlGenerator(host, port) {
-    let url = 'http://' + host;
+function defaultUrlGenerator(host, port,isHttps) {
+    let protocol = 'http://';
+    if(isHttps){
+        protocol = 'https://'
+    }
+
+    let url = protocol + host;
     if (port) {
         url += ':' + port + '/';
     }
@@ -59,12 +64,13 @@ module.exports = class Pomelo extends EventEmitter {
         this.decode = decode;
 
         this.headers = headers || {};
+        this.isHttps = params.isHttps || false;
 
         if (debugMode) {
-            this.url = defaultUrlGenerator(host, port);
+            this.url = defaultUrlGenerator(host, port,this.isHttps);
         }
         else {
-            this.url = this.urlGenerator(host, port);
+            this.url = this.urlGenerator(host, port,this.isHttps);
         }
 
         if (browserWS) {
@@ -217,6 +223,7 @@ module.exports = class Pomelo extends EventEmitter {
     newInstance() {
         return new Pomelo({
             xmlHttpRequestCreator: this.xmlHttpRequestCreator,
+            xmlHttpRequestCreatorWeb: this.xmlHttpRequestCreatorWeb,
             urlGenerator: this.urlGenerator
         });
     }
